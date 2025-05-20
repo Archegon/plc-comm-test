@@ -1,57 +1,32 @@
-import time
 from snap7 import Client
-from snap7.util import get_int, set_int
+from snap7.util import get_real
 from snap7.type import Area
 
-# === Initialize and connect to LOGO! PLC ===
+# === Setup and Connect ===
 client = Client()
-client.set_connection_type(3)
+client.set_connection_type(3)  # For S7-200 Smart: ISO-on-TCP, TSAP-based
 client.set_connection_params("192.168.2.1", 0x0100, 0x0200)
 client.connect("192.168.2.1", 0, 0)
 
-# === Helper functions ===
+# === Helper function to read REAL from M area (VDxxx) ===
+def read_vd(byte_addr: int) -> float:
+    data = client.read_area(Area.MK, 0, byte_addr, 4)
+    return get_real(data, 0)
 
-def read_vw(byte_addr: int) -> int:
-    """Read a 16-bit signed integer from memory word VWxx"""
-    data = client.read_area(Area.MK, 0, byte_addr, 2)
-    return get_int(data, 0)
+# === Read and display all pressure-related values ===
+baseline_pressure     = read_vd(400)  # VD400
+cocoon_pressure       = read_vd(500)  # VD500
+target_pressure       = read_vd(512)  # VD512
+pressure_change_rate  = read_vd(516)  # VD516
+calculated_pressure   = read_vd(550)  # VD550
+oxygen_flow_rate      = read_vd(566)  # VD566
 
-def write_aqw(byte_addr: int, value: int):
-    """Write 16-bit signed integer to analog output word AQWxx"""
-    buffer = bytearray(2)
-    set_int(buffer, 0, value)
-    client.write_area(Area.PA, 0, byte_addr, buffer)
+print("[PRESSURE VALUES - REALS]")
+print(f"  VD400 - Baseline Pressure     : {baseline_pressure:.2f}")
+print(f"  VD500 - Cocoon Pressure       : {cocoon_pressure:.2f}")
+print(f"  VD512 - Target Pressure       : {target_pressure:.2f}")
+print(f"  VD516 - Pressure Change Rate  : {pressure_change_rate:.2f}")
+print(f"  VD550 - Calculated Pressure   : {calculated_pressure:.2f}")
+print(f"  VD566 - Oxygen Flow Rate      : {oxygen_flow_rate:.2f}")
 
-# === Real-time Monitoring Loop ===
-
-try:
-    while True:
-        # === Analog Inputs via VWx memory mappings ===
-        # AIW16 (Pressure Sensor 1) → VW12
-        pressure_1 = read_vw(12)
-
-        # AIW18 (Pressure Sensor 2) → VW14
-        pressure_2 = read_vw(14)
-
-        # AIW20 (Oxygen Concentration Sensor) → VW16
-        oxygen_concentration = read_vw(16)
-
-        # AIW22 (Temperature Sensor) → VW18
-        temperature = read_vw(18)
-
-        # AIW32 (Humidity Sensor) → VW28
-        humidity = read_vw(28)
-
-        # === Display Sensor Data ===
-        print("[SENSOR READINGS]")
-        print(f"  Pressure Sensor 1 (AIW16)       : {pressure_1}")
-        print(f"  Pressure Sensor 2 (AIW18)       : {pressure_2}")
-        print(f"  Oxygen Concentration (AIW20)    : {oxygen_concentration}")
-        print(f"  Temperature Sensor (AIW22)      : {temperature}")
-        print(f"  Humidity Sensor (AIW32)         : {humidity}")
-
-        time.sleep(1)
-
-except KeyboardInterrupt:
-    print("Interrupted by user. Disconnecting...")
-    client.disconnect()
+client.disconnect()
