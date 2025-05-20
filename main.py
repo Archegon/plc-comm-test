@@ -4,7 +4,7 @@ from snap7.util import get_int, set_int, get_real
 from snap7.type import Area
 
 client = Client()
-client.set_connection_params("192.168.2.1", 0x0100, 0x0200)
+client.set_connection_type(3)
 
 # Now connect (still must provide IP, rack, slot)
 client.connect("192.168.2.1", 0, 0)
