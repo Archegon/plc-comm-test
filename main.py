@@ -3,14 +3,11 @@ from snap7 import Client
 from snap7.util import get_int, set_int, get_real
 from snap7.type import Area
 
-# PLC connection settings
-PLC_IP = "192.168.2.1"
-RACK = 0
-SLOT = 0
-
-# Create and connect client
 client = Client()
-client.connect(PLC_IP, RACK, SLOT, 102)
+client.set_connection_params("192.168.2.1", 0x0100, 0x0200)
+
+# Now connect (still must provide IP, rack, slot)
+client.connect("192.168.2.1", 0, 0)
 
 # === Helper functions ===
 
