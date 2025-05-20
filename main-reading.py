@@ -19,24 +19,13 @@ def read_vd(byte_addr: int) -> float:
 # === Real-time Loop ===
 
 try:
-    while True:
-        baseline_pressure     = read_vd(400)
-        cocoon_pressure       = read_vd(500)
-        target_setpoint       = read_vd(512)
-        pressure_change_rate  = read_vd(516)
-        calculated_pressure   = read_vd(550)
-        oxygen_flow_rate      = read_vd(566)
+    for addr in range(0, 256, 4):
+        try:
+            value = read_vd(addr)
+            print(f"VD{addr}: {value:.2f}")
+        except Exception as e:
+            print(f"VD{addr}: {e}")
 
-        print("[PRESSURE READINGS]")
-        print(f"  VD400 - Baseline Pressure     : {baseline_pressure:.2f}")
-        print(f"  VD500 - Cocoon Pressure       : {cocoon_pressure:.2f}")
-        print(f"  VD512 - Target Pressure       : {target_setpoint:.2f}")
-        print(f"  VD516 - Pressure Change Rate  : {pressure_change_rate:.2f}")
-        print(f"  VD550 - Calculated Pressure   : {calculated_pressure:.2f}")
-        print(f"  VD566 - Oxygen Flow Rate      : {oxygen_flow_rate:.2f}")
-        print()
-
-        time.sleep(1)
 
 except KeyboardInterrupt:
     print("Interrupted by user. Closing connection...")
