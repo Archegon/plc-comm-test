@@ -1,6 +1,6 @@
 import time
 from snap7 import Client
-from snap7.util import get_int, set_int
+from snap7.util import get_int, set_int, get_real
 from snap7.type import Area
 
 # PLC connection settings
@@ -25,9 +25,31 @@ def write_aqw(byte_addr: int, value: int):
     set_int(buffer, 0, value)
     client.write_area(Area.PA, 0, byte_addr, buffer)
 
+def read_vw(byte_addr: int) -> int:
+    """Read 16-bit signed integer from memory word VWxx"""
+    data = client.read_area(Area.MK, 0, byte_addr, 2)
+    return get_int(data, 0)
+
+def read_vd(byte_addr: int) -> float:
+    """Read 32-bit REAL (float) from memory double word VDxxx"""
+    data = client.read_area(Area.MK, 0, byte_addr, 4)
+    return get_real(data, 0)
+
+def set_memory_bit(byte_addr: int, bit_index: int, value: bool):
+    """Set or clear a single bit in memory (M area)."""
+    # Read 1 byte from the memory byte
+    data = bytearray(client.read_area(Area.MK, 0, byte_addr, 1))
+    if value:
+        data[0] |= (1 << bit_index)   # Set bit
+    else:
+        data[0] &= ~(1 << bit_index)  # Clear bit
+    client.write_area(Area.MK, 0, byte_addr, data)
+
 # === Real-time Loop ===
 
 try:
+    #set_memory_bit(14, 3, True)
+
     while True:
         # Read analog inputs
         pressure_1 = read_aiw(16)
