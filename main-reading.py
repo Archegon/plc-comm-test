@@ -1,5 +1,6 @@
 import snap7
 from snap7.util import *
+from snap7 import Area
 
 
 class OutputType:
@@ -25,15 +26,15 @@ class S7_200:
     def _resolve_area(self, mem):
         mem = mem.lower()
         if mem.startswith("ai") or mem.startswith("iw"):
-            return 0x81  # Input
+            return Area.PE
         elif mem.startswith("aq") or mem.startswith("qw"):
-            return 0x82  # Output
+            return Area.PA
         elif mem.startswith("q"):
-            return 0x82  # Output bit
+            return Area.PA
         elif mem.startswith("i"):
-            return 0x81  # Input bit
+            return Area.PE
         elif mem.startswith("v") or mem.startswith("m"):
-            return 0x83  # Memory
+            return Area.MK
         else:
             raise ValueError(f"Unknown memory area for '{mem}'")
 
