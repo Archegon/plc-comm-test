@@ -25,7 +25,9 @@ class S7_200:
 
     def _resolve_area(self, mem):
         mem = mem.lower()
-        if mem.startswith("ai") or mem.startswith("iw"):
+        if mem.startswith("db"):
+            return Area.DB
+        elif mem.startswith("ai") or mem.startswith("iw"):
             return Area.PE
         elif mem.startswith("aq") or mem.startswith("qw"):
             return Area.PA
@@ -40,42 +42,67 @@ class S7_200:
 
     def getMem(self, mem, returnByte=False):
         mem = mem.lower()
-        area = self._resolve_area(mem)
         length = 1
         out_type = None
         bit = 0
         start = 0
+        db_number = 0
 
-        if mem[1] == 'x':  # Bit
-            out_type = OutputType.BOOL
-            start = int(mem[2:].split('.')[0])
-            bit = int(mem.split('.')[1])
-            length = 1
-        elif mem[1] == 'b':  # Byte
-            out_type = OutputType.INT
-            start = int(mem[2:])
-            length = 1
-        elif mem[1] == 'w':  # Word
-            out_type = OutputType.INT
-            start = int(mem[2:])
-            length = 2
-        elif mem[1] == 'd':  # DWord or REAL
-            start = int(mem[2:])
-            length = 4
-            if mem.startswith("vd"):
+        if mem.startswith("db"):
+            db_number = int(mem.split('.')[0][2:])
+            sub = mem.split('.')[1]
+
+            if sub.startswith("dbx"):
+                out_type = OutputType.BOOL
+                start = int(sub[3:].split('.')[0])
+                bit = int(sub.split('.')[1])
+                length = 1
+            elif sub.startswith("dbb"):
+                out_type = OutputType.INT
+                start = int(sub[3:])
+                length = 1
+            elif sub.startswith("dbw"):
+                out_type = OutputType.INT
+                start = int(sub[3:])
+                length = 2
+            elif sub.startswith("dbd"):
                 out_type = OutputType.REAL
-            else:
-                out_type = OutputType.DWORD
-        elif mem.startswith("aiw") or mem.startswith("aqw") or mem.startswith("iw") or mem.startswith("qw") or mem.startswith("vw"):
-            start = int(mem[3:])
-            length = 2
-            out_type = OutputType.INT
-        elif mem.startswith("vd"):
-            start = int(mem[2:])
-            length = 4
-            out_type = OutputType.REAL
+                start = int(sub[3:])
+                length = 4
+            area = Area.DB
+        else:
+            area = self._resolve_area(mem)
 
-        data = self.plc.read_area(area, 0, start, length)
+            if mem[1] == 'x':  # Bit
+                out_type = OutputType.BOOL
+                start = int(mem[2:].split('.')[0])
+                bit = int(mem.split('.')[1])
+                length = 1
+            elif mem[1] == 'b':  # Byte
+                out_type = OutputType.INT
+                start = int(mem[2:])
+                length = 1
+            elif mem[1] == 'w':  # Word
+                out_type = OutputType.INT
+                start = int(mem[2:])
+                length = 2
+            elif mem[1] == 'd':  # DWord or REAL
+                start = int(mem[2:])
+                length = 4
+                if mem.startswith("vd"):
+                    out_type = OutputType.REAL
+                else:
+                    out_type = OutputType.DWORD
+            elif mem.startswith(("aiw", "aqw", "iw", "qw", "vw")):
+                start = int(mem[3:])
+                length = 2
+                out_type = OutputType.INT
+            elif mem.startswith("vd"):
+                start = int(mem[2:])
+                length = 4
+                out_type = OutputType.REAL
+
+        data = self.plc.read_area(area, db_number, start, length)
 
         if returnByte:
             return data
@@ -92,43 +119,68 @@ class S7_200:
         mem = mem.lower()
         data = self.getMem(mem, returnByte=True)
 
-        area = self._resolve_area(mem)
         length = 1
         out_type = None
         bit = 0
         start = 0
+        db_number = 0
 
-        if mem[1] == 'x':
-            out_type = OutputType.BOOL
-            start = int(mem[2:].split('.')[0])
-            bit = int(mem.split('.')[1])
-            set_bool(data, 0, bit, int(value))
-        elif mem[1] == 'b':
-            out_type = OutputType.INT
-            start = int(mem[2:])
-            set_int(data, 0, value)
-        elif mem[1] == 'w':
-            out_type = OutputType.INT
-            start = int(mem[2:])
-            set_int(data, 0, value)
-        elif mem[1] == 'd':
-            start = int(mem[2:])
-            if mem.startswith("vd"):
+        if mem.startswith("db"):
+            db_number = int(mem.split('.')[0][2:])
+            sub = mem.split('.')[1]
+
+            if sub.startswith("dbx"):
+                out_type = OutputType.BOOL
+                start = int(sub[3:].split('.')[0])
+                bit = int(sub.split('.')[1])
+                set_bool(data, 0, bit, int(value))
+            elif sub.startswith("dbb"):
+                out_type = OutputType.INT
+                start = int(sub[3:])
+                set_int(data, 0, value)
+            elif sub.startswith("dbw"):
+                out_type = OutputType.INT
+                start = int(sub[3:])
+                set_int(data, 0, value)
+            elif sub.startswith("dbd"):
                 out_type = OutputType.REAL
+                start = int(sub[3:])
                 set_real(data, 0, value)
-            else:
-                out_type = OutputType.DWORD
-                set_dword(data, 0, value)
-        elif mem.startswith("aqw") or mem.startswith("qw") or mem.startswith("vw"):
-            out_type = OutputType.INT
-            start = int(mem[3:])
-            set_int(data, 0, value)
-        elif mem.startswith("vd"):
-            out_type = OutputType.REAL
-            start = int(mem[2:])
-            set_real(data, 0, value)
+            area = Area.DB
+        else:
+            area = self._resolve_area(mem)
 
-        return self.plc.write_area(area, 0, start, data)
+            if mem[1] == 'x':
+                out_type = OutputType.BOOL
+                start = int(mem[2:].split('.')[0])
+                bit = int(mem.split('.')[1])
+                set_bool(data, 0, bit, int(value))
+            elif mem[1] == 'b':
+                out_type = OutputType.INT
+                start = int(mem[2:])
+                set_int(data, 0, value)
+            elif mem[1] == 'w':
+                out_type = OutputType.INT
+                start = int(mem[2:])
+                set_int(data, 0, value)
+            elif mem[1] == 'd':
+                start = int(mem[2:])
+                if mem.startswith("vd"):
+                    out_type = OutputType.REAL
+                    set_real(data, 0, value)
+                else:
+                    out_type = OutputType.DWORD
+                    set_dword(data, 0, value)
+            elif mem.startswith(("aqw", "qw", "vw")):
+                out_type = OutputType.INT
+                start = int(mem[3:])
+                set_int(data, 0, value)
+            elif mem.startswith("vd"):
+                out_type = OutputType.REAL
+                start = int(mem[2:])
+                set_real(data, 0, value)
+
+        return self.plc.write_area(area, db_number, start, data)
 
     def disconnect(self):
         self.plc.disconnect()
@@ -139,8 +191,8 @@ plc = S7_200("192.168.2.1", 0x0100, 0x0200)
 print("Pressure Sensor (AIW16):", plc.getMem("AIW16"))
 print("Oxygen Sensor  (AIW20):", plc.getMem("AIW20"))
 
-# Read memory REALs (VD)
-print("Baseline Pressure (VD400):", plc.getMem("VD400"))
-print("Flow Rate        (VD566):", plc.getMem("VD566"))
+# Read from DB1 REALs
+print("Baseline Pressure (DB1.DBD400):", plc.getMem("DB1.DBD400"))
+print("Flow Rate        (DB1.DBD566):", plc.getMem("DB1.DBD566"))
 
 plc.disconnect()
