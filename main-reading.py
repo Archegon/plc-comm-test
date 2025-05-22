@@ -21,6 +21,7 @@ class S7_200:
             self.plc.connect(ip, 0, 0)
             if self.plc.get_connected():
                 print("Connected to S7-200 Smart")
+                self.plc.get_cpu_info()
         except Exception as e:
             print(f"Connection failed: {e}")
 
@@ -190,6 +191,17 @@ plc = S7_200("192.168.2.1", 0x0100, 0x0200)
 
 try:
     while True:
+        print("[ANALOG INPUTS (AIW)]")
+        print("  Pressure Sensor 1 (AIW16)       :", plc.getMem("AIW16"))
+        print("  Pressure Sensor 2 (AIW18)       :", plc.getMem("AIW18"))
+        print("  Oxygen Concentration (AIW20)    :", plc.getMem("AIW20"))
+        print("  Temperature Sensor (AIW22)      :", plc.getMem("AIW22"))
+        print("  Humidity Sensor (AIW32)         :", plc.getMem("AIW32"))
+
+        print("\n[ANALOG OUTPUTS (AQW)]")
+        print("  Main Oxygen Valve (AQW16)       :", plc.getMem("AQW16"))
+        print("  Fan Speed Control (AQW18)       :", plc.getMem("AQW18"))
+
         print("[PRESSURE CONTROL VARIABLES]")
         print("  Baseline Pressure (VD400)       :", plc.getMem("DB1.DBD400"))
         print("  Cocoon Pressure (VD500)         :", plc.getMem("DB1.DBD500"))
@@ -201,13 +213,33 @@ try:
 
         print("\n[TEMPERATURE VARIABLES]")
         print("  Current Temp (VD408)            :", plc.getMem("DB1.DBD408"))
-        print("  Temp Setpoint (VD412)           :", plc.getMem("DB1.DBD412"))
+        print("  Humidity (VD412)           :", plc.getMem("DB1.DBD412"))
         print("  Temp Control Range (VD524)      :", plc.getMem("DB1.DBD524"))
-        print("  Temp Safety Limit (VD900)       :", plc.getMem("DB1.DBD900"))
+        print("  Temp Set Point (VD900)       :", plc.getMem("DB1.DBD900"))
         print("  Control Param 1 (VD904)         :", plc.getMem("DB1.DBD904"))
         print("  Control Param 2 (VD908)         :", plc.getMem("DB1.DBD908"))
         print("  Control Param 3 (VD912)         :", plc.getMem("DB1.DBD912"))
         print("  Temp Adjustment Factor (VD916)  :", plc.getMem("DB1.DBD916"))
+
+        print("\n[STATUS BITS]")
+        print("  M3.0 - Startup                  :", plc.getMem("VX3.0"))
+        print("  M3.1 - Running                  :", plc.getMem("VX3.1"))
+        print("  M3.2 - Pressurizing             :", plc.getMem("VX3.2"))
+        print("  M3.3 - Depressurizing           :", plc.getMem("VX3.3"))
+        print("  M3.4-M3.7 - Reserved            :", [plc.getMem(f"VX3.{i}") for i in range(4, 8)])
+
+        print("  M4.0 - Mode: Rest & Relax       :", plc.getMem("VX4.0"))
+        print("  M4.1 - Mode: Health & Wellness :", plc.getMem("VX4.1"))
+        print("  M4.2 - Mode: Professional       :", plc.getMem("VX4.2"))
+        print("  M4.3 - Mode: Custom             :", plc.getMem("VX4.3"))
+
+        print("  M5.0 - Compression: Beginner    :", plc.getMem("VX5.0"))
+        print("  M5.1 - Compression: Normal      :", plc.getMem("VX5.1"))
+        print("  M5.2 - Compression: Fast        :", plc.getMem("VX5.2"))
+
+        print("  M5.3 - Duration: 60min          :", plc.getMem("VX5.3"))
+        print("  M5.4 - Duration: 90min          :", plc.getMem("VX5.4"))
+        print("  M5.5 - Duration: 120min         :", plc.getMem("VX5.5"))
 
         print("\n--- Refreshing in 1s ---\n")
         time.sleep(1)
