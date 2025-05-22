@@ -1,4 +1,5 @@
 import snap7
+import time
 from snap7.util import *
 from snap7 import Area
 
@@ -187,12 +188,30 @@ class S7_200:
 
 plc = S7_200("192.168.2.1", 0x0100, 0x0200)
 
-# Read analog inputs (AIW)
-print("Pressure Sensor (AIW16):", plc.getMem("AIW16"))
-print("Oxygen Sensor  (AIW20):", plc.getMem("AIW20"))
+try:
+    while True:
+        print("[PRESSURE CONTROL VARIABLES]")
+        print("  Baseline Pressure (VD400)       :", plc.getMem("DB1.DBD400"))
+        print("  Cocoon Pressure (VD500)         :", plc.getMem("DB1.DBD500"))
+        print("  Target Setpoint (VD512)         :", plc.getMem("DB1.DBD512"))
+        print("  Rate of Change (VD516)          :", plc.getMem("DB1.DBD516"))
+        print("  Intermediate Value (VD508)      :", plc.getMem("DB1.DBD508"))
+        print("  Calculated Pressure (VD550)     :", plc.getMem("DB1.DBD550"))
+        print("  Oxygen Flow Rate (VD566)        :", plc.getMem("DB1.DBD566"))
 
-# Read from DB1 REALs
-print("Baseline Pressure (DB1.DBD400):", plc.getMem("DB1.DBD400"))
-print("Flow Rate        (DB1.DBD566):", plc.getMem("DB1.DBD566"))
+        print("\n[TEMPERATURE VARIABLES]")
+        print("  Current Temp (VD408)            :", plc.getMem("DB1.DBD408"))
+        print("  Temp Setpoint (VD412)           :", plc.getMem("DB1.DBD412"))
+        print("  Temp Control Range (VD524)      :", plc.getMem("DB1.DBD524"))
+        print("  Temp Safety Limit (VD900)       :", plc.getMem("DB1.DBD900"))
+        print("  Control Param 1 (VD904)         :", plc.getMem("DB1.DBD904"))
+        print("  Control Param 2 (VD908)         :", plc.getMem("DB1.DBD908"))
+        print("  Control Param 3 (VD912)         :", plc.getMem("DB1.DBD912"))
+        print("  Temp Adjustment Factor (VD916)  :", plc.getMem("DB1.DBD916"))
 
-plc.disconnect()
+        print("\n--- Refreshing in 1s ---\n")
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    print("Interrupted by user. Disconnecting...")
+    plc.disconnect()
