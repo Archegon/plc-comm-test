@@ -207,6 +207,11 @@ try:
         print("  M13.6  (VX13.6)  :", plc.getMem("VX13.6"))
         print("  M13.7  (VX13.7)  :", plc.getMem("VX13.7"))
 
+        print("  Normalize Atmosphere (VD416)    :", plc.getMem("DB1.DBD416"))
+        print("  Ambient O2 % (VD420)            :", plc.getMem("DB1.DBD420"))
+        print("  Baseline Offset P (VD502)       :", plc.getMem("DB1.DBD502"))
+
+
         print("\n--- Refreshing in 0.5s ---\n")
         time.sleep(0.5)
 
