@@ -197,21 +197,9 @@ try:
         print("  M11.4  (VX11.4)  :", plc.getMem("VX11.4"))
         print("  M20.0  (VX20.0)  :", plc.getMem("VX20.0"))
         print("  M20.1  (VX20.1)  :", plc.getMem("VX20.1"))
-        print("  M14.0  (VX14.0)  :", plc.getMem("VX14.0"))
-        print("  M14.1  (VX14.1)  :", plc.getMem("VX14.1"))
-        print("  M14.2  (VX14.2)  :", plc.getMem("VX14.2"))
-        print("  M14.3  (VX14.3)  :", plc.getMem("VX14.3"))
+        print("  M15.1  (VX15.1)  :", plc.getMem("VX15.1"))
         print("  M15.2  (VX15.2)  :", plc.getMem("VX15.2"))
-        print("  M13.4  (VX13.4)  :", plc.getMem("VX13.4"))
-        print("  M13.5  (VX13.5)  :", plc.getMem("VX13.5"))
-        print("  M13.6  (VX13.6)  :", plc.getMem("VX13.6"))
-        print("  M13.7  (VX13.7)  :", plc.getMem("VX13.7"))
-
-        print("  Normalize Atmosphere (VD416)    :", plc.getMem("DB1.DBD416"))
-        print("  Ambient O2 % (VD420)            :", plc.getMem("DB1.DBD420"))
-        print("  Baseline Offset P (VD502)       :", plc.getMem("DB1.DBD502"))
-
-
+        print("  Adjusted Basline (VD508)    :", plc.getMem("DB1.DBD508"))
         print("\n--- Refreshing in 0.5s ---\n")
         time.sleep(0.5)
 
