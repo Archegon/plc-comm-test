@@ -6,25 +6,25 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #e6f0ff, #f9fcff);
+      background-color: #121212;
+      color: #e0e0e0;
       padding: 20px;
-      color: #333;
     }
     .section {
-      background: #ffffff;
+      background: #1f1f1f;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
       padding: 20px;
       margin-bottom: 25px;
     }
     h1 {
       text-align: center;
-      color: #1a73e8;
+      color: #90caf9;
     }
     h2 {
       margin-top: 0;
-      color: #555;
-      border-bottom: 1px solid #ddd;
+      color: #bbdefb;
+      border-bottom: 1px solid #333;
       padding-bottom: 5px;
     }
     button {
@@ -32,14 +32,15 @@
       padding: 10px 16px;
       border: none;
       border-radius: 8px;
-      background-color: #1a73e8;
+      background-color: #1e88e5;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.1s;
     }
     button:hover {
-      background-color: #155ab6;
+      background-color: #1565c0;
+      transform: scale(1.03);
     }
     .bit-indicator {
       display: inline-block;
@@ -49,10 +50,10 @@
       margin-right: 8px;
     }
     .on {
-      background-color: #4caf50;
+      background-color: #66bb6a;
     }
     .off {
-      background-color: #f44336;
+      background-color: #ef5350;
     }
     p span {
       font-weight: bold;
@@ -68,9 +69,8 @@
     <p>Humidity: <span id="Current_humidity"></span> %</p>
     <p>Ambient O₂: <span id="Ambient_O2_Percent"></span> %</p>
     <p>Chamber Pressure: <span id="Display_Current_Pressure"></span> bar</p>
-    <p>Pressure Target: <span id="Current_Pressure_Target"></span> bar</p>
-    <p>Seconds: <span id="Seconds_Counter"></span></p>
     <p>Minutes: <span id="Minute_Counter"></span></p>
+    <p>Seconds: <span id="Seconds_Counter"></span></p>
   </div>
 
   <div class="section">
@@ -92,7 +92,6 @@
     <h2>Compression Rate Selection</h2>
     <div id="compression-buttons"></div>
   </div>
-
 <script>
 const bitButtons = {
   "Pressure_Rate_Set_Flag": "M3.0",
@@ -129,16 +128,14 @@ const statusBits = [
   "Equalise_state", "Running_state", "Pressuring_state", "Stabilising_state",
   "Depressurise_state", "Stop_state",
   ...Object.keys(modeBits),
-  ...Object.keys(compressionBits),
-  "Duration_60m", "Duration_90m", "Duration_120m"
+  ...Object.keys(compressionBits)
 ];
 
 function updateUI(data) {
-  document.getElementById('Current_temp').textContent = data.Current_temp.toFixed(1);
-  document.getElementById('Current_humidity').textContent = data.Current_humidity.toFixed(1);
-  document.getElementById('Ambient_O2_Percent').textContent = data.Ambient_O2_Percent.toFixed(1);
-  document.getElementById('Display_Current_Pressure').textContent = data.Display_Current_Pressure.toFixed(2);
-  document.getElementById('Current_Pressure_Target').textContent = data.Current_Pressure_Target.toFixed(2);
+  document.getElementById('Current_temp').textContent = data.Current_temp.toFixed(2);
+  document.getElementById('Current_humidity').textContent = data.Current_humidity.toFixed(2);
+  document.getElementById('Ambient_O2_Percent').textContent = data.Ambient_O2_Percent.toFixed(2);
+  document.getElementById('Display_Current_Pressure').textContent = data.Display_Current_Pressure.toFixed(3);
   document.getElementById('Seconds_Counter').textContent = data.Seconds_Counter.toFixed(0);
   document.getElementById('Minute_Counter').textContent = data.Minute_Counter.toFixed(0);
 
