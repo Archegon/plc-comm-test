@@ -4,13 +4,59 @@
   <title>PLC Dashboard</title>
   <meta charset="UTF-8">
   <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    .section { background: white; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
-    h2 { margin-top: 0; }
-    button { margin: 5px; padding: 8px 12px; }
-    .bit-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
-    .on { background-color: green; }
-    .off { background-color: red; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e6f0ff, #f9fcff);
+      padding: 20px;
+      color: #333;
+    }
+    .section {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+    h1 {
+      text-align: center;
+      color: #1a73e8;
+    }
+    h2 {
+      margin-top: 0;
+      color: #555;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+    button {
+      margin: 6px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #1a73e8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #155ab6;
+    }
+    .bit-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .on {
+      background-color: #4caf50;
+    }
+    .off {
+      background-color: #f44336;
+    }
+    p span {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -34,6 +80,16 @@
     <div id="buttons"></div>
   </div>
 
+  <div class="section">
+    <h2>Mode Selection</h2>
+    <div id="mode-buttons"></div>
+  </div>
+
+  <div class="section">
+    <h2>Compression Rate Selection</h2>
+    <div id="compression-buttons"></div>
+  </div>
+
 <script>
 const bitButtons = {
   "Pressure_Rate_Set_Flag": "M3.0",
@@ -43,11 +99,26 @@ const bitButtons = {
   "Ceiling_Lights_State": "M13.5"
 };
 
+const modeBits = {
+  "Mode_Rest": "M4.0",
+  "Mode_Health": "M4.1",
+  "Mode_Professional": "M4.2",
+  "Mode_Custom": "M4.3",
+  "Mode_o2_100": "M4.4",
+  "Mode_o2_120": "M4.5"
+};
+
+const compressionBits = {
+  "Compression_Beginner": "M5.0",
+  "Compression_Normal": "M5.1",
+  "Compression_Fast": "M5.2"
+};
+
 const statusBits = [
   "Equalise_state", "Running_state", "Pressuring_state", "Stabilising_state",
   "Depressurise_state", "Stop_state",
-  "Mode_Rest", "Mode_Health", "Mode_Professional", "Mode_Custom", "Mode_o2_100", "Mode_o2_120",
-  "Compression_Beginner", "Compression_Normal", "Compression_Fast",
+  ...Object.keys(modeBits),
+  ...Object.keys(compressionBits),
   "Duration_60m", "Duration_90m", "Duration_120m"
 ];
 
@@ -79,6 +150,8 @@ function setupWebSocket() {
 document.addEventListener('DOMContentLoaded', () => {
   setupWebSocket();
   refreshButtons();
+  renderSelectorButtons("mode-buttons", modeBits);
+  renderSelectorButtons("compression-buttons", compressionBits);
 });
 
 function refreshButtons() {
@@ -102,6 +175,25 @@ function toggleBit(address, value) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ address: address, value: value })
+  }).then(() => refreshButtons());
+}
+
+function renderSelectorButtons(containerId, bitMap) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for (const [label, address] of Object.entries(bitMap)) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.onclick = () => setExclusive(address);
+    container.appendChild(btn);
+  }
+}
+
+function setExclusive(address) {
+  fetch('/write-bit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address: address, value: true })
   }).then(() => refreshButtons());
 }
 </script>
