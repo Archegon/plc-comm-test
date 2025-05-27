@@ -191,17 +191,15 @@ plc = S7_200("192.168.2.1", 0x0100, 0x0200)
 
 try:
     while True:
-        print("[TOUCHSCREEN-CONTROLLED BITS]")
+        print("[REAL-TIME SENSOR VALUES]")
 
-        print("  M1.6   (VX1.6)   :", plc.getMem("VX1.6"))
-        print("  M11.4  (VX11.4)  :", plc.getMem("VX11.4"))
-        print("  M20.0  (VX20.0)  :", plc.getMem("VX20.0"))
-        print("  M20.1  (VX20.1)  :", plc.getMem("VX20.1"))
-        print("  M15.1  (VX15.1)  :", plc.getMem("VX15.1"))
-        print("  M15.2  (VX15.2)  :", plc.getMem("VX15.2"))
-        print("  Adjusted Basline (VD508)    :", plc.getMem("DB1.DBD508"))
-        print("\n--- Refreshing in 0.5s ---\n")
-        time.sleep(0.5)
+        print("  Current Temperature       (VD408):", plc.getMem("DB1.DBD408"))
+        print("  Current Humidity          (VD412):", plc.getMem("DB1.DBD412"))
+        print("  Ambient O2 Percentage     (VD420):", plc.getMem("DB1.DBD420"))
+        print("  Display Pressure (Chamber)(VD504):", plc.getMem("DB1.DBD504"))
+
+        print("\n--- Refreshing in 1s ---\n")
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("Interrupted by user. Disconnecting...")
