@@ -1,7 +1,8 @@
 import snap7
 from snap7.util import *
 from snap7 import Area
-
+import threading
+import time
 
 class OutputType:
     BOOL = 1
@@ -9,12 +10,12 @@ class OutputType:
     REAL = 3
     DWORD = 4
 
-
 class S7_200:
     def __init__(self, ip, localtsap, remotetsap):
         self.plc = snap7.client.Client()
         self.plc.set_connection_type(3)
         self.plc.set_connection_params(ip, localtsap, remotetsap)
+        self.lock = threading.Lock()
 
         try:
             self.plc.connect(ip, 0, 0)
@@ -113,7 +114,8 @@ class S7_200:
                 length = 4
                 out_type = OutputType.REAL
 
-        data = self.plc.read_area(area, db_number, start, length)
+        with self.lock:
+            data = self.plc.read_area(area, db_number, start, length)
 
         if returnByte:
             return data
@@ -191,7 +193,10 @@ class S7_200:
                 start = int(mem[2:])
                 set_real(data, 0, value)
 
-        return self.plc.write_area(area, db_number, start, data)
+        with self.lock:
+            result = self.plc.write_area(area, db_number, start, data)
+            time.sleep(0.05)
+        return result
 
     def disconnect(self):
         self.plc.disconnect()

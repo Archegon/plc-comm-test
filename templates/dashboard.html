@@ -51,25 +51,37 @@ const statusBits = [
   "Duration_60m", "Duration_90m", "Duration_120m"
 ];
 
-function refreshStatus() {
-  fetch('/status')
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('Current_temp').textContent = data.Current_temp.toFixed(1);
-      document.getElementById('Current_humidity').textContent = data.Current_humidity.toFixed(1);
-      document.getElementById('Ambient_O2_Percent').textContent = data.Ambient_O2_Percent.toFixed(1);
-      document.getElementById('Display_Current_Pressure').textContent = data.Display_Current_Pressure.toFixed(2);
+function updateUI(data) {
+  document.getElementById('Current_temp').textContent = data.Current_temp.toFixed(1);
+  document.getElementById('Current_humidity').textContent = data.Current_humidity.toFixed(1);
+  document.getElementById('Ambient_O2_Percent').textContent = data.Ambient_O2_Percent.toFixed(1);
+  document.getElementById('Display_Current_Pressure').textContent = data.Display_Current_Pressure.toFixed(2);
 
-      const states = document.getElementById('states');
-      states.innerHTML = '';
-      statusBits.forEach(key => {
-        const val = data[key];
-        const div = document.createElement('div');
-        div.innerHTML = `<span class="bit-indicator ${val ? 'on' : 'off'}"></span>${key}`;
-        states.appendChild(div);
-      });
-    });
+  const states = document.getElementById('states');
+  states.innerHTML = '';
+  statusBits.forEach(key => {
+    const val = data[key];
+    const div = document.createElement('div');
+    div.innerHTML = `<span class="bit-indicator ${val ? 'on' : 'off'}"></span>${key}`;
+    states.appendChild(div);
+  });
+}
 
+function setupWebSocket() {
+  const ws = new WebSocket(`ws://${location.host}/ws/status`);
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    updateUI(data);
+  };
+  ws.onclose = () => setTimeout(setupWebSocket, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupWebSocket();
+  refreshButtons();
+});
+
+function refreshButtons() {
   fetch('/button-status')
     .then(res => res.json())
     .then(data => {
@@ -90,11 +102,8 @@ function toggleBit(address, value) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ address: address, value: value })
-  }).then(() => refreshStatus());
+  }).then(() => refreshButtons());
 }
-
-setInterval(refreshStatus, 2000);
-document.addEventListener('DOMContentLoaded', refreshStatus);
 </script>
 </body>
 </html>

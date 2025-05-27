@@ -38,7 +38,8 @@ Current_humidity	VD412
 Ambient_O2_Percent	VD420
 Display_Current_Pressure	VD504
 """
-from fastapi import FastAPI, Request
+import asyncio
+from fastapi import FastAPI, Request, WebSocket
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -59,6 +60,16 @@ class BitWriteRequest(BaseModel):
 async def index(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
+@app.websocket("/ws/status")
+async def websocket_status(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = read_status()  # reuse your existing function
+            await websocket.send_json(data)
+            await asyncio.sleep(0.5)
+    except Exception:
+        await websocket.close()
 
 # --- Read Route ---
 @app.get("/status")
