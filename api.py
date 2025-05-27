@@ -38,11 +38,11 @@ Current_humidity	VD412
 Ambient_O2_Percent	VD420
 Display_Current_Pressure	VD504
 """
-from fastapi import APIRouter
+from fastapi import FastAPI
 from pydantic import BaseModel
 from plc import S7_200
 
-router = APIRouter()
+app = FastAPI()
 plc = S7_200("192.168.2.1", 0x0100, 0x0200)
 
 # --- Request Model ---
@@ -51,7 +51,7 @@ class BitWriteRequest(BaseModel):
     value: bool
 
 # --- Read Route ---
-@router.get("/status")
+@app.get("/status")
 def read_status():
     return {
         # Bit states to display
@@ -85,18 +85,18 @@ def read_status():
     }
 
 # --- Bit Read ---
-@router.get("/read-bit")
+@app.get("/read-bit")
 def read_memory_bit(address: str):
     return {"address": address, "value": plc.getMem(address)}
 
 # --- Bit Write ---
-@router.post("/write-bit")
+@app.post("/write-bit")
 def write_memory_bit(req: BitWriteRequest):
     plc.writeMem(req.address, req.value)
     return {"address": req.address, "new_value": req.value}
 
 # --- Button control bits ---
-@router.get("/button-status")
+@app.get("/button-status")
 def button_status():
     return {
         "Pressure_Rate_Set_Flag": plc.getMem("VX3.0"),

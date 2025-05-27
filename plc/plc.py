@@ -20,7 +20,7 @@ class S7_200:
             self.plc.connect(ip, 0, 0)
             if self.plc.get_connected():
                 print("Connected to S7-200 Smart")
-                self.plc.get_cpu_info()
+                print("CPU Info:", self.plc.get_cpu_info())
         except Exception as e:
             print(f"Connection failed: {e}")
 
