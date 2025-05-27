@@ -185,3 +185,7 @@ class S7_200:
 
     def disconnect(self):
         self.plc.disconnect()
+
+
+if __name__ == "__main__":
+    plc = S7_200("192.168.2.1", 0x0100, 0x0200)
