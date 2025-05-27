@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PLC Dashboard</title>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
+    .section { background: white; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+    h2 { margin-top: 0; }
+    button { margin: 5px; padding: 8px 12px; }
+    .bit-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+    .on { background-color: green; }
+    .off { background-color: red; }
+  </style>
+</head>
+<body>
+  <h1>PLC Control Panel</h1>
+
+  <div class="section" id="readings">
+    <h2>Sensor Readings</h2>
+    <p>Temperature: <span id="Current_temp"></span> °C</p>
+    <p>Humidity: <span id="Current_humidity"></span> %</p>
+    <p>Ambient O₂: <span id="Ambient_O2_Percent"></span> %</p>
+    <p>Chamber Pressure: <span id="Display_Current_Pressure"></span> bar</p>
+  </div>
+
+  <div class="section">
+    <h2>System States</h2>
+    <div id="states"></div>
+  </div>
+
+  <div class="section">
+    <h2>Control Buttons</h2>
+    <div id="buttons"></div>
+  </div>
+
+<script>
+const bitButtons = {
+  "Pressure_Rate_Set_Flag": "M3.0",
+  "AC_state": "M11.4",
+  "Intercom_State": "M14.3",
+  "Depressurisation_Confirm": "M15.1",
+  "Ceiling_Lights_State": "M13.5"
+};
+
+const statusBits = [
+  "Equalise_state", "Running_state", "Pressuring_state", "Stabilising_state",
+  "Depressurise_state", "Stop_state",
+  "Mode_Rest", "Mode_Health", "Mode_Professional", "Mode_Custom", "Mode_o2_100", "Mode_o2_120",
+  "Compression_Beginner", "Compression_Normal", "Compression_Fast",
+  "Duration_60m", "Duration_90m", "Duration_120m"
+];
+
+function refreshStatus() {
+  fetch('/status')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('Current_temp').textContent = data.Current_temp.toFixed(1);
+      document.getElementById('Current_humidity').textContent = data.Current_humidity.toFixed(1);
+      document.getElementById('Ambient_O2_Percent').textContent = data.Ambient_O2_Percent.toFixed(1);
+      document.getElementById('Display_Current_Pressure').textContent = data.Display_Current_Pressure.toFixed(2);
+
+      const states = document.getElementById('states');
+      states.innerHTML = '';
+      statusBits.forEach(key => {
+        const val = data[key];
+        const div = document.createElement('div');
+        div.innerHTML = `<span class="bit-indicator ${val ? 'on' : 'off'}"></span>${key}`;
+        states.appendChild(div);
+      });
+    });
+
+  fetch('/button-status')
+    .then(res => res.json())
+    .then(data => {
+      const buttons = document.getElementById('buttons');
+      buttons.innerHTML = '';
+      for (const [label, addr] of Object.entries(bitButtons)) {
+        const current = data[label];
+        const btn = document.createElement('button');
+        btn.textContent = `${label}: ${current ? 'ON' : 'OFF'}`;
+        btn.onclick = () => toggleBit(addr, !current);
+        buttons.appendChild(btn);
+      }
+    });
+}
+
+function toggleBit(address, value) {
+  fetch('/write-bit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address: address, value: value })
+  }).then(() => refreshStatus());
+}
+
+setInterval(refreshStatus, 2000);
+document.addEventListener('DOMContentLoaded', refreshStatus);
+</script>
+</body>
+</html>

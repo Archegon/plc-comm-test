@@ -38,17 +38,27 @@ Current_humidity	VD412
 Ambient_O2_Percent	VD420
 Display_Current_Pressure	VD504
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from plc import S7_200
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
 plc = S7_200("192.168.2.1", 0x0100, 0x0200)
 
 # --- Request Model ---
 class BitWriteRequest(BaseModel):
     address: str  # e.g. "VX3.0"
     value: bool
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
 
 # --- Read Route ---
 @app.get("/status")
