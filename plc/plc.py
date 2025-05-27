@@ -1,5 +1,4 @@
 import snap7
-import time
 from snap7.util import *
 from snap7 import Area
 
@@ -186,21 +185,3 @@ class S7_200:
 
     def disconnect(self):
         self.plc.disconnect()
-
-plc = S7_200("192.168.2.1", 0x0100, 0x0200)
-
-try:
-    while True:
-        print("[REAL-TIME SENSOR VALUES]")
-
-        print("  Current Temperature       (VD408):", plc.getMem("DB1.DBD408"))
-        print("  Current Humidity          (VD412):", plc.getMem("DB1.DBD412"))
-        print("  Ambient O2 Percentage     (VD420):", plc.getMem("DB1.DBD420"))
-        print("  Display Pressure (Chamber)(VD504):", plc.getMem("DB1.DBD504"))
-
-        print("\n--- Refreshing in 1s ---\n")
-        time.sleep(1)
-
-except KeyboardInterrupt:
-    print("Interrupted by user. Disconnecting...")
-    plc.disconnect()
