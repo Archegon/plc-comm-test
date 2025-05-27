@@ -23,6 +23,17 @@ class S7_200:
         except Exception as e:
             print(f"Connection failed: {e}")
 
+    def _translate_alias(self, mem):
+        mem = mem.upper()
+        if mem.startswith("M") and "." in mem:
+            byte, bit = mem[1:].split(".")
+            return f"VX{byte}.{bit}"
+        if mem.startswith("VD"):
+            return f"DB1.DBD{mem[2:]}"
+        if mem.startswith("VW"):
+            return f"DB1.DBW{mem[2:]}"
+        return mem
+
     def _resolve_area(self, mem):
         mem = mem.lower()
         if mem.startswith("db"):
@@ -41,7 +52,7 @@ class S7_200:
             raise ValueError(f"Unknown memory area for '{mem}'")
 
     def getMem(self, mem, returnByte=False):
-        mem = mem.lower()
+        mem = self._translate_alias(mem).lower()
         length = 1
         out_type = None
         bit = 0
@@ -73,20 +84,20 @@ class S7_200:
         else:
             area = self._resolve_area(mem)
 
-            if mem[1] == 'x':  # Bit
+            if mem[1] == 'x':
                 out_type = OutputType.BOOL
                 start = int(mem[2:].split('.')[0])
                 bit = int(mem.split('.')[1])
                 length = 1
-            elif mem[1] == 'b':  # Byte
+            elif mem[1] == 'b':
                 out_type = OutputType.INT
                 start = int(mem[2:])
                 length = 1
-            elif mem[1] == 'w':  # Word
+            elif mem[1] == 'w':
                 out_type = OutputType.INT
                 start = int(mem[2:])
                 length = 2
-            elif mem[1] == 'd':  # DWord or REAL
+            elif mem[1] == 'd':
                 start = int(mem[2:])
                 length = 4
                 if mem.startswith("vd"):
@@ -116,7 +127,7 @@ class S7_200:
             return get_dword(data, 0)
 
     def writeMem(self, mem, value):
-        mem = mem.lower()
+        mem = self._translate_alias(mem).lower()
         data = self.getMem(mem, returnByte=True)
 
         length = 1
