@@ -68,6 +68,9 @@
     <p>Humidity: <span id="Current_humidity"></span> %</p>
     <p>Ambient O₂: <span id="Ambient_O2_Percent"></span> %</p>
     <p>Chamber Pressure: <span id="Display_Current_Pressure"></span> bar</p>
+    <p>Pressure Target: <span id="Current_Pressure_Target"></span> bar</p>
+    <p>Seconds: <span id="Seconds_Counter"></span></p>
+    <p>Minutes: <span id="Minute_Counter"></span></p>
   </div>
 
   <div class="section">
@@ -96,7 +99,15 @@ const bitButtons = {
   "AC_state": "M11.4",
   "Intercom_State": "M14.3",
   "Depressurisation_Confirm": "M15.1",
-  "Ceiling_Lights_State": "M13.5"
+  "Ceiling_Lights_State": "M13.5",
+  "Shutdown_button": "M1.6",
+
+  "Manual_Mode": "M14.0",
+  "Oxygen_Supply1_Manual": "M14.1",
+  "Oxygen_Supply2_Manual": "M14.2",
+  "Solenoid_Pump1_Manual": "M13.4",
+  "Pump1_Manual": "M13.6",
+  "Pump2_Manual": "M13.7"
 };
 
 const modeBits = {
@@ -127,6 +138,9 @@ function updateUI(data) {
   document.getElementById('Current_humidity').textContent = data.Current_humidity.toFixed(1);
   document.getElementById('Ambient_O2_Percent').textContent = data.Ambient_O2_Percent.toFixed(1);
   document.getElementById('Display_Current_Pressure').textContent = data.Display_Current_Pressure.toFixed(2);
+  document.getElementById('Current_Pressure_Target').textContent = data.Current_Pressure_Target.toFixed(2);
+  document.getElementById('Seconds_Counter').textContent = data.Seconds_Counter.toFixed(0);
+  document.getElementById('Minute_Counter').textContent = data.Minute_Counter.toFixed(0);
 
   const states = document.getElementById('states');
   states.innerHTML = '';
